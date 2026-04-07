@@ -62,6 +62,28 @@ config/
 - `server.port` is used as the Nest startup port
 - `PORT` and `HOST` environment variables override YAML values when provided
 
+### MySQL / TypeORM
+
+The project now includes `TypeORM` with MySQL 5.7-compatible `mysql2` driver support.
+
+- Database settings live under the `database` node in `config/application.yml`
+- `database.enabled` controls whether Nest initializes the MySQL connection at startup
+- `application.test.yml` keeps `database.enabled: false` so the existing test suite does not depend on an external MySQL instance
+- Supported database environment overrides:
+  - `DB_ENABLED`
+  - `DB_HOST`
+  - `DB_PORT`
+  - `DB_USERNAME`
+  - `DB_PASSWORD`
+  - `DB_NAME`
+  - `DB_CHARSET`
+  - `DB_TIMEZONE`
+  - `DB_LOGGING`
+  - `DB_SYNCHRONIZE`
+  - `DB_AUTO_LOAD_ENTITIES`
+
+To enable a local MySQL 5.7 connection, set `database.enabled: true` in the active environment config and fill in the actual connection parameters.
+
 ## Run tests
 
 ```bash
