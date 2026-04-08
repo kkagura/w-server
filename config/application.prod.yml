@@ -1,6 +1,0 @@
-server:
-  port: 8080
-
-database:
-  # 生产环境请在此文件或部署环境变量中覆盖真实库配置后再启用。
-  enabled: false

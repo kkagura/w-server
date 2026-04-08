@@ -1,6 +1,0 @@
-server:
-  port: 3001
-
-database:
-  # 测试环境默认不初始化 MySQL，避免单测和 e2e 依赖外部数据库。
-  enabled: false
