@@ -17,7 +17,9 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "db": "ts-node --esm src/commands/db.command.ts",
+    "typeorm": "ts-node --esm ./node_modules/typeorm/cli.js -d src/data-source.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

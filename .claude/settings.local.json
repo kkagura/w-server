@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const { DataSource } = require\\(''typeorm''\\); console.log\\(Object.keys\\(DataSource.prototype\\).filter\\(k => k.toLowerCase\\(\\).includes\\(''migrat''\\)\\).join\\(''\\\\n''\\)\\)\")",
+      "Bash(node -e \"const t = require\\(''typeorm''\\); console.log\\(''runMigrations'' in t.DataSource.prototype, ''undoLastMigration'' in t.DataSource.prototype\\)\")",
+      "Bash(node -e \"const t = require\\(''typeorm''\\); console.log\\(''synchronize'' in t.DataSource.prototype\\)\")",
+      "Bash(node -e \"const { DataSource } = require\\(''typeorm''\\); const m = DataSource.prototype.synchronize; console.log\\(m.toString\\(\\).slice\\(0, 200\\)\\)\")",
+      "Bash(node -e \"const { DataSource } = require\\(''typeorm''\\); console.log\\(DataSource.prototype.undoLastMigration.toString\\(\\).slice\\(0, 300\\)\\)\")",
+      "Bash(node -e \"console.log\\(require\\(''./package.json''\\).type || ''commonjs''\\)\")",
+      "Bash(node -e \"const p = require\\(''./package.json''\\); console.log\\(JSON.stringify\\(p.scripts, null, 2\\)\\)\")"
+    ]
+  }
+}

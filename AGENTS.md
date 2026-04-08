@@ -173,3 +173,69 @@ database:
 - 如配置项参与启动逻辑，优先通过 `ConfigService` 读取，不要直接在业务代码中读取 `process.env`
 - 保持配置命名语义清晰，避免缩写和含义不明的字段名
 - 如后续配置项增加较多，可以按领域拆分为单独的配置服务或配置常量
+
+## 数据库迁移
+
+### 目录结构
+
+```
+src/
+  └─ migrations/            # TypeORM 迁移文件目录
+  └─ commands/
+      └─ db.command.ts      # 数据库迁移 CLI
+```
+
+### 环境说明
+
+迁移命令通过 `NODE_ENV` 识别环境，未设置时默认 `dev`。配置文件必须位于 `config/` 目录。
+
+### 常用命令
+
+```bash
+# 初始化数据库（创建数据库，仅首次需要）
+pnpm db init
+
+# 运行待执行迁移
+pnpm db migrate
+
+# 回滚上一次迁移
+pnpm db revert
+
+# 同步 schema（根据 Entity 定义建表/修改表，仅 dev/test 可用）
+pnpm db sync
+
+# 查看帮助
+pnpm db help
+```
+
+### 指定环境
+
+通过 `NODE_ENV` 环境变量指定目标环境：
+
+```bash
+NODE_ENV=test pnpm db migrate   # 对 test 环境执行迁移
+NODE_ENV=prod pnpm db init      # 对 prod 环境初始化数据库
+```
+
+### 使用 TypeORM CLI 管理迁移
+
+```bash
+# 创建新迁移（需先编写好 Entity）
+pnpm typeorm migration:create ./src/migrations/MigrationName
+
+# 生成迁移（根据当前 Entity 与数据库差异自动生成）
+pnpm typeorm migration:generate ./src/migrations/MigrationName
+
+# 查看迁移状态
+pnpm typeorm migration:show
+```
+
+### 迁移文件约定
+
+- 迁移文件统一放在 `src/migrations/` 目录
+- 文件命名格式：`{timestamp}-{MigrationName}.ts`
+- 每次上线前确保迁移已全部执行
+
+### 事务说明
+
+`migrate` 和 `revert` 命令默认以 `transaction: 'all'` 模式运行，即所有迁移在同一事务中执行。任意一个失败则全部自动回滚，确保不会留下部分完成的迁移状态。
