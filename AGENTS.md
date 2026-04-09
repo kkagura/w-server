@@ -181,6 +181,7 @@ database:
 ```
 src/
   └─ migrations/            # TypeORM 迁移文件目录
+      └─ {timestamp}-InitialSchema.ts  # 初始迁移（含基础表结构）
   └─ commands/
       └─ db.command.ts      # 数据库迁移 CLI
 ```
@@ -235,6 +236,7 @@ pnpm typeorm migration:show
 - 迁移文件统一放在 `src/migrations/` 目录
 - 文件命名格式：`{timestamp}-{MigrationName}.ts`
 - 每次上线前确保迁移已全部执行
+- 项目初始迁移文件 `InitialSchema` 用于建立基础表结构（如 `_version` 版本表），不可删除
 
 ### 事务说明
 
