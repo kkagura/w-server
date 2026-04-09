@@ -241,3 +241,74 @@ pnpm typeorm migration:show
 ### 事务说明
 
 `migrate` 和 `revert` 命令默认以 `transaction: 'all'` 模式运行，即所有迁移在同一事务中执行。任意一个失败则全部自动回滚，确保不会留下部分完成的迁移状态。
+
+## 分页查询
+
+### 工具模块
+
+所有分页逻辑统一封装在 `src/common/pagination.ts`，各模块 Service 查询列表时必须使用该模块，保证分页参数和行为一致。
+
+### 导出内容
+
+| 导出 | 类型 | 说明 |
+|------|------|------|
+| `PaginationParams` | interface | 分页请求参数接口 |
+| `PaginationMeta` | interface | 分页元数据（page, pageSize, total, pageCount） |
+| `PaginatedResult<T>` | interface | 统一返回结构 `{ list: T[], pagination: PaginationMeta }` |
+| `parsePaginationParams` | function | 解析分页参数，含边界保护 |
+| `paginate` | function | 对 SelectQueryBuilder 应用 skip/take |
+| `getPageAndCount` | async function | 执行分页查询并返回 `PaginatedResult<T>` |
+
+### 参数规格
+
+```typescript
+interface PaginationParams {
+  page?: number;     // 默认 1，最小 1
+  pageSize?: number; // 默认 10，最大 100
+}
+```
+
+### 使用方式
+
+```typescript
+import {
+  parsePaginationParams,
+  paginate,
+  getPageAndCount,
+} from '@/common/pagination';
+import type { PaginationParams } from '@/common/pagination';
+
+async findAll(query: YourQueryDto): Promise<PaginatedResult<YourEntity>> {
+  const { page, pageSize } = parsePaginationParams(query);
+
+  const qb = this.repo
+    .createQueryBuilder('entity')
+    .where('entity.delete_at IS NULL');
+  // ... 其他条件
+
+  paginate(qb, query);
+  qb.orderBy('entity.id', 'DESC');
+
+  return getPageAndCount(qb, page, pageSize);
+}
+```
+
+### 统一响应格式
+
+```json
+{
+  "list": [...],
+  "pagination": {
+    "page": 1,
+    "pageSize": 10,
+    "total": 42,
+    "pageCount": 5
+  }
+}
+```
+
+### 约束
+
+- 所有列表查询接口分页参数必须使用 `PaginationParams`
+- `pageSize` 上限为 100，防止一次查询过多数据
+- `QueryDto` 接口须继承 `PaginationParams`
