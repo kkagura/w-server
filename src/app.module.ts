@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
+import { User } from './modules/user/user.entity';
 import configuration from './config/configuration';
 import type { AppConfig } from './config/config.types';
 import { createTypeOrmOptions } from './config/typeorm.config';
@@ -23,7 +24,10 @@ import { createTypeOrmOptions } from './config/typeorm.config';
           infer: true,
         });
 
-        return createTypeOrmOptions(databaseConfig);
+        return {
+          ...createTypeOrmOptions(databaseConfig),
+          entities: [User],
+        };
       },
     }),
     UserModule,

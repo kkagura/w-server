@@ -85,6 +85,9 @@ export async function runMigration(): Promise<void> {
     timezone: db.timezone,
     synchronize: false,
     logging: true,
+    entities: ['src/**/*.entity.ts'],
+    migrations: ['src/migrations/*.ts'],
+    migrationsTableName: 'typeorm_migrations',
   });
 
   try {
@@ -127,6 +130,9 @@ export async function revertMigration(): Promise<void> {
     timezone: db.timezone,
     synchronize: false,
     logging: true,
+    entities: ['src/**/*.entity.ts'],
+    migrations: ['src/migrations/*.ts'],
+    migrationsTableName: 'typeorm_migrations',
   });
 
   try {

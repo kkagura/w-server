@@ -19,25 +19,25 @@ export class User {
   @Column({ type: 'char', length: 8 })
   salt: string;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
+  @Column({ name: 'nickname', type: 'varchar', length: 50, nullable: true })
   nickname: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true, unique: true })
+  @Column({ name: 'email', type: 'varchar', length: 100, nullable: true, unique: true })
   email: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true, unique: true })
+  @Column({ name: 'mobile', type: 'varchar', length: 20, nullable: true, unique: true })
   mobile: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ name: 'avatar', type: 'varchar', length: 255, nullable: true })
   avatar: string;
 
-  @Column({ type: 'tinyint', default: 1 })
+  @Column({ name: 'status', type: 'tinyint', default: 1 })
   status: number;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
+  @Column({ name: 'login_ip', type: 'varchar', length: 50, nullable: true })
   loginIp: string;
 
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ name: 'login_at', type: 'datetime', nullable: true })
   loginAt: Date;
 
   @Column({ name: 'create_by', type: 'bigint', unsigned: true, nullable: true })
