@@ -8,6 +8,7 @@ import { User } from './modules/user/user.entity';
 import configuration from './config/configuration';
 import type { AppConfig } from './config/config.types';
 import { createTypeOrmOptions } from './config/typeorm.config';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { createTypeOrmOptions } from './config/typeorm.config';
       ignoreEnvFile: true,
       load: [configuration],
     }),
+    RedisModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

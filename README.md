@@ -84,6 +84,25 @@ The project now includes `TypeORM` with MySQL 5.7-compatible `mysql2` driver sup
 
 To enable a local MySQL 5.7 connection, set `database.enabled: true` in the active environment config and fill in the actual connection parameters.
 
+### Redis
+
+The project now includes an optional `ioredis` client connection.
+
+- Redis settings live under the `redis` node in `config/application.yml`
+- `redis.enabled` controls whether Nest initializes the Redis connection at startup
+- `application.test.yml` keeps `redis.enabled: false` so the test suite does not depend on an external Redis instance
+- Supported Redis environment overrides:
+  - `REDIS_ENABLED`
+  - `REDIS_HOST`
+  - `REDIS_PORT`
+  - `REDIS_USERNAME`
+  - `REDIS_PASSWORD`
+  - `REDIS_DB`
+  - `REDIS_KEY_PREFIX`
+  - `REDIS_CONNECT_TIMEOUT`
+
+When you need to use Redis in business code, inject `RedisService` and call `getClient()` to obtain the raw `ioredis` client instance.
+
 ## Run tests
 
 ```bash

@@ -12,6 +12,17 @@ export interface DatabaseConfig {
   autoLoadEntities: boolean;
 }
 
+export interface RedisConfig {
+  enabled: boolean;
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  db: number;
+  keyPrefix: string;
+  connectTimeout: number;
+}
+
 export interface AppConfig {
   app: {
     env: string;
@@ -22,4 +33,5 @@ export interface AppConfig {
     port: number;
   };
   database: DatabaseConfig;
+  redis: RedisConfig;
 }

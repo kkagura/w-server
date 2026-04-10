@@ -20,6 +20,14 @@ const DEFAULT_DATABASE_TIMEZONE = '+08:00';
 const DEFAULT_DATABASE_LOGGING = false;
 const DEFAULT_DATABASE_SYNCHRONIZE = false;
 const DEFAULT_DATABASE_AUTO_LOAD_ENTITIES = true;
+const DEFAULT_REDIS_ENABLED = false;
+const DEFAULT_REDIS_HOST = '127.0.0.1';
+const DEFAULT_REDIS_PORT = 6379;
+const DEFAULT_REDIS_USERNAME = '';
+const DEFAULT_REDIS_PASSWORD = '';
+const DEFAULT_REDIS_DB = 0;
+const DEFAULT_REDIS_KEY_PREFIX = '';
+const DEFAULT_REDIS_CONNECT_TIMEOUT = 10000;
 const CONFIG_DIR = 'config';
 const BASE_CONFIG_FILE = 'application.yml';
 
@@ -65,16 +73,38 @@ function readYamlFile(filePath: string): PlainObject {
   return parsed;
 }
 
-function parsePort(value: unknown, fieldName: string): number {
-  const port = Number(value);
+function parseIntegerInRange(
+  value: unknown,
+  fieldName: string,
+  min: number,
+  max?: number,
+): number {
+  const numberValue = Number(value);
+  const isOutOfRange =
+    numberValue < min || (max !== undefined && numberValue > max);
 
-  if (!Number.isInteger(port) || port <= 0 || port > 65535) {
+  if (!Number.isInteger(numberValue) || isOutOfRange) {
+    const rangeText =
+      max === undefined ? `greater than or equal to ${min}` : `between ${min} and ${max}`;
+
     throw new Error(
-      `Invalid ${fieldName} value: "${String(value)}". Expected an integer between 1 and 65535.`,
+      `Invalid ${fieldName} value: "${String(value)}". Expected an integer ${rangeText}.`,
     );
   }
 
-  return port;
+  return numberValue;
+}
+
+function parsePort(value: unknown, fieldName: string): number {
+  return parseIntegerInRange(value, fieldName, 1, 65535);
+}
+
+function parseNonNegativeInteger(value: unknown, fieldName: string): number {
+  return parseIntegerInRange(value, fieldName, 0);
+}
+
+function parsePositiveInteger(value: unknown, fieldName: string): number {
+  return parseIntegerInRange(value, fieldName, 1);
 }
 
 function parseBoolean(value: unknown, fieldName: string): boolean {
@@ -117,6 +147,7 @@ function loadConfig(): AppConfig {
   const rawApp = isPlainObject(merged.app) ? merged.app : {};
   const rawServer = isPlainObject(merged.server) ? merged.server : {};
   const rawDatabase = isPlainObject(merged.database) ? merged.database : {};
+  const rawRedis = isPlainObject(merged.redis) ? merged.redis : {};
   const host = process.env.HOST ?? rawServer.host ?? DEFAULT_HOST;
   const port = parsePort(
     process.env.PORT ?? rawServer.port ?? DEFAULT_PORT,
@@ -145,6 +176,24 @@ function loadConfig(): AppConfig {
       rawDatabase.autoLoadEntities ??
       DEFAULT_DATABASE_AUTO_LOAD_ENTITIES,
     'database.autoLoadEntities',
+  );
+  const redisEnabled = parseBoolean(
+    process.env.REDIS_ENABLED ?? rawRedis.enabled ?? DEFAULT_REDIS_ENABLED,
+    'redis.enabled',
+  );
+  const redisPort = parsePort(
+    process.env.REDIS_PORT ?? rawRedis.port ?? DEFAULT_REDIS_PORT,
+    'redis.port',
+  );
+  const redisDb = parseNonNegativeInteger(
+    process.env.REDIS_DB ?? rawRedis.db ?? DEFAULT_REDIS_DB,
+    'redis.db',
+  );
+  const redisConnectTimeout = parsePositiveInteger(
+    process.env.REDIS_CONNECT_TIMEOUT ??
+      rawRedis.connectTimeout ??
+      DEFAULT_REDIS_CONNECT_TIMEOUT,
+    'redis.connectTimeout',
   );
 
   return {
@@ -186,6 +235,28 @@ function loadConfig(): AppConfig {
       logging: databaseLogging,
       synchronize: databaseSynchronize,
       autoLoadEntities: databaseAutoLoadEntities,
+    },
+    redis: {
+      enabled: redisEnabled,
+      host: parseString(
+        process.env.REDIS_HOST ?? rawRedis.host,
+        DEFAULT_REDIS_HOST,
+      ),
+      port: redisPort,
+      username: parsePassword(
+        process.env.REDIS_USERNAME ?? rawRedis.username,
+        DEFAULT_REDIS_USERNAME,
+      ),
+      password: parsePassword(
+        process.env.REDIS_PASSWORD ?? rawRedis.password,
+        DEFAULT_REDIS_PASSWORD,
+      ),
+      db: redisDb,
+      keyPrefix: parsePassword(
+        process.env.REDIS_KEY_PREFIX ?? rawRedis.keyPrefix,
+        DEFAULT_REDIS_KEY_PREFIX,
+      ),
+      connectTimeout: redisConnectTimeout,
     },
   };
 }
