@@ -28,6 +28,13 @@ const DEFAULT_REDIS_PASSWORD = '';
 const DEFAULT_REDIS_DB = 0;
 const DEFAULT_REDIS_KEY_PREFIX = '';
 const DEFAULT_REDIS_CONNECT_TIMEOUT = 10000;
+const DEFAULT_AUTH_ACCESS_TOKEN_SECRET = 'please-change-me-access-token-secret';
+const DEFAULT_AUTH_ACCESS_TOKEN_EXPIRES_IN = 900;
+const DEFAULT_AUTH_REFRESH_TOKEN_SECRET =
+  'please-change-me-refresh-token-secret';
+const DEFAULT_AUTH_REFRESH_TOKEN_EXPIRES_IN = 604800;
+const DEFAULT_AUTH_ISSUER = 'w-server';
+const DEFAULT_AUTH_AUDIENCE = 'w-server-client';
 const CONFIG_DIR = 'config';
 const BASE_CONFIG_FILE = 'application.yml';
 
@@ -148,6 +155,7 @@ function loadConfig(): AppConfig {
   const rawServer = isPlainObject(merged.server) ? merged.server : {};
   const rawDatabase = isPlainObject(merged.database) ? merged.database : {};
   const rawRedis = isPlainObject(merged.redis) ? merged.redis : {};
+  const rawAuth = isPlainObject(merged.auth) ? merged.auth : {};
   const host = process.env.HOST ?? rawServer.host ?? DEFAULT_HOST;
   const port = parsePort(
     process.env.PORT ?? rawServer.port ?? DEFAULT_PORT,
@@ -194,6 +202,18 @@ function loadConfig(): AppConfig {
       rawRedis.connectTimeout ??
       DEFAULT_REDIS_CONNECT_TIMEOUT,
     'redis.connectTimeout',
+  );
+  const authAccessTokenExpiresIn = parsePositiveInteger(
+    process.env.AUTH_ACCESS_TOKEN_EXPIRES_IN ??
+      rawAuth.accessTokenExpiresIn ??
+      DEFAULT_AUTH_ACCESS_TOKEN_EXPIRES_IN,
+    'auth.accessTokenExpiresIn',
+  );
+  const authRefreshTokenExpiresIn = parsePositiveInteger(
+    process.env.AUTH_REFRESH_TOKEN_EXPIRES_IN ??
+      rawAuth.refreshTokenExpiresIn ??
+      DEFAULT_AUTH_REFRESH_TOKEN_EXPIRES_IN,
+    'auth.refreshTokenExpiresIn',
   );
 
   return {
@@ -257,6 +277,26 @@ function loadConfig(): AppConfig {
         DEFAULT_REDIS_KEY_PREFIX,
       ),
       connectTimeout: redisConnectTimeout,
+    },
+    auth: {
+      accessTokenSecret: parseString(
+        process.env.AUTH_ACCESS_TOKEN_SECRET ?? rawAuth.accessTokenSecret,
+        DEFAULT_AUTH_ACCESS_TOKEN_SECRET,
+      ),
+      accessTokenExpiresIn: authAccessTokenExpiresIn,
+      refreshTokenSecret: parseString(
+        process.env.AUTH_REFRESH_TOKEN_SECRET ?? rawAuth.refreshTokenSecret,
+        DEFAULT_AUTH_REFRESH_TOKEN_SECRET,
+      ),
+      refreshTokenExpiresIn: authRefreshTokenExpiresIn,
+      issuer: parseString(
+        process.env.AUTH_ISSUER ?? rawAuth.issuer,
+        DEFAULT_AUTH_ISSUER,
+      ),
+      audience: parseString(
+        process.env.AUTH_AUDIENCE ?? rawAuth.audience,
+        DEFAULT_AUTH_AUDIENCE,
+      ),
     },
   };
 }

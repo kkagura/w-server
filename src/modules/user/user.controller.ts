@@ -15,36 +15,38 @@ import type {
   UpdateUserDto,
   UserQueryDto,
 } from './user.service';
+import { toPublicUser, toPublicUsers } from './user.presenter';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  create(@Body() dto: CreateUserDto) {
-    return this.userService.create(dto);
+  async create(@Body() dto: CreateUserDto) {
+    return toPublicUser(await this.userService.create(dto));
   }
 
   @Get()
-  findAll(@Query() query: UserQueryDto) {
-    return this.userService.findAll(query);
+  async findAll(@Query() query: UserQueryDto) {
+    return toPublicUsers(await this.userService.findAll(query));
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.findOne(id);
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    return toPublicUser(await this.userService.findOne(id));
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateUserDto,
   ) {
-    return this.userService.update(id, dto);
+    return toPublicUser(await this.userService.update(id, dto));
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.remove(id);
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    await this.userService.remove(id);
+    return { success: true };
   }
 }

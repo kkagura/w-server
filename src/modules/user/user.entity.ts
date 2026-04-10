@@ -13,10 +13,10 @@ export class User {
   @Column({ type: 'varchar', length: 50, unique: true })
   username: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, select: false })
   password: string;
 
-  @Column({ type: 'char', length: 8 })
+  @Column({ type: 'char', length: 8, select: false })
   salt: string;
 
   @Column({ name: 'nickname', type: 'varchar', length: 50, nullable: true })

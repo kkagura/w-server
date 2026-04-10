@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { randomBytes } from 'node:crypto';
 import { User } from './user.entity';
 import {
   paginate,
@@ -10,6 +9,7 @@ import {
   type PaginatedResult,
   type PaginationParams,
 } from '@/common/pagination';
+import { generatePasswordSalt, hashPassword } from '../auth/password.util';
 
 export interface CreateUserDto {
   username: string;
@@ -42,13 +42,14 @@ export class UserService {
   ) {}
 
   async create(dto: CreateUserDto): Promise<User> {
-    const salt = randomBytes(4).toString('hex'); // 8 char hex
-    // Note: password hashing should be done with bcrypt in production
-    // hash = await bcrypt(password + salt)
+    const salt = generatePasswordSalt();
+    const password = await hashPassword(dto.password, salt);
     const user = this.userRepo.create({
       ...dto,
+      password,
       salt,
     });
+
     return this.userRepo.save(user);
   }
 
@@ -91,5 +92,31 @@ export class UserService {
   async remove(id: number): Promise<void> {
     const user = await this.findOne(id);
     await this.userRepo.softRemove(user);
+  }
+
+  async findForAuthByUsername(username: string): Promise<User | null> {
+    return this.userRepo
+      .createQueryBuilder('user')
+      .addSelect(['user.password', 'user.salt'])
+      .where('user.username = :username', { username })
+      .andWhere('user.delete_at IS NULL')
+      .getOne();
+  }
+
+  async findActiveById(id: number): Promise<User | null> {
+    return this.userRepo.findOne({ where: { id } });
+  }
+
+  async updateLoginInfo(id: number, loginIp: string | null): Promise<void> {
+    await this.userRepo.update(id, {
+      loginIp: loginIp ?? undefined,
+      loginAt: new Date(),
+    });
+  }
+
+  async updatePasswordHash(id: number, password: string): Promise<void> {
+    await this.userRepo.update(id, {
+      password,
+    });
   }
 }

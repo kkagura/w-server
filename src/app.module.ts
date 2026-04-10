@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
 import { User } from './modules/user/user.entity';
+import { AuthModule } from './modules/auth/auth.module';
 import configuration from './config/configuration';
 import type { AppConfig } from './config/config.types';
 import { createTypeOrmOptions } from './config/typeorm.config';
@@ -18,6 +19,7 @@ import { RedisModule } from './redis/redis.module';
       load: [configuration],
     }),
     RedisModule,
+    AuthModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

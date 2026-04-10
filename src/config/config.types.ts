@@ -23,6 +23,15 @@ export interface RedisConfig {
   connectTimeout: number;
 }
 
+export interface AuthConfig {
+  accessTokenSecret: string;
+  accessTokenExpiresIn: number;
+  refreshTokenSecret: string;
+  refreshTokenExpiresIn: number;
+  issuer: string;
+  audience: string;
+}
+
 export interface AppConfig {
   app: {
     env: string;
@@ -34,4 +43,5 @@ export interface AppConfig {
   };
   database: DatabaseConfig;
   redis: RedisConfig;
+  auth: AuthConfig;
 }
