@@ -83,10 +83,13 @@ export class AuthService {
 
     const userId = this.parseUserId(payload.sub);
     const session = await this.getSession(payload.sessionId);
+    const sessionUserId = session
+      ? this.parseUserId(String(session.userId))
+      : null;
 
     if (
       !session ||
-      session.userId !== userId ||
+      sessionUserId !== userId ||
       session.refreshTokenHash !== this.hashToken(normalizedRefreshToken)
     ) {
       throw new UnauthorizedException('Refresh Token 已失效');
@@ -128,8 +131,11 @@ export class AuthService {
 
     const userId = this.parseUserId(payload.sub);
     const session = await this.getSession(payload.sessionId);
+    const sessionUserId = session
+      ? this.parseUserId(String(session.userId))
+      : null;
 
-    if (!session || session.userId !== userId) {
+    if (!session || sessionUserId !== userId) {
       throw new UnauthorizedException('登录会话不存在或已失效');
     }
 
@@ -174,7 +180,7 @@ export class AuthService {
     const redis = this.getRedisClient();
     const authConfig = this.getAuthConfig();
     const session: AuthSession = {
-      userId: user.id,
+      userId: this.parseUserId(String(user.id)),
       username: user.username,
       sessionId,
       refreshTokenHash: this.hashToken(refreshToken),

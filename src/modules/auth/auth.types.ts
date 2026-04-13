@@ -9,7 +9,7 @@ export interface AuthTokenPayload {
 }
 
 export interface AuthSession {
-  userId: number;
+  userId: number | string;
   username: string;
   sessionId: string;
   refreshTokenHash: string;

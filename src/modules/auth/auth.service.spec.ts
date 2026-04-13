@@ -148,4 +148,39 @@ describe('AuthService', () => {
       expect.any(String),
     );
   });
+
+  it('should validate access token when redis session userId is stored as string', async () => {
+    const loginResult = await service.login(
+      { username: 'admin', password: '123456' },
+      '127.0.0.1',
+    );
+    const accessPayload = await jwtService.verifyAsync<AuthTokenPayload>(
+      loginResult.accessToken,
+      {
+        secret: authConfig.accessTokenSecret,
+        audience: authConfig.audience,
+        issuer: authConfig.issuer,
+      },
+    );
+    const sessionKey = `auth:session:${accessPayload.sessionId}`;
+    const session = JSON.parse(redisClient.store.get(sessionKey) ?? '{}') as {
+      userId?: number | string;
+    };
+
+    redisClient.store.set(
+      sessionKey,
+      JSON.stringify({
+        ...session,
+        userId: String(session.userId),
+      }),
+    );
+
+    await expect(
+      service.validateAccessPayload(accessPayload),
+    ).resolves.toMatchObject({
+      id: 1,
+      username: 'admin',
+      sessionId: accessPayload.sessionId,
+    });
+  });
 });
