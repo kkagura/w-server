@@ -32,6 +32,22 @@ export interface AuthConfig {
   audience: string;
 }
 
+export interface MinioConfig {
+  enabled: boolean;
+  endpoint: string;
+  port: number;
+  useSSL: boolean;
+  accessKey: string;
+  secretKey: string;
+  bucket: string;
+}
+
+export interface FileConfig {
+  maxSize: number;
+  previewMimeTypes: string[];
+  allowedMimeTypes: string[];
+}
+
 export interface AppConfig {
   app: {
     env: string;
@@ -44,4 +60,6 @@ export interface AppConfig {
   database: DatabaseConfig;
   redis: RedisConfig;
   auth: AuthConfig;
+  minio: MinioConfig;
+  file: FileConfig;
 }

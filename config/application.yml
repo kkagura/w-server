@@ -69,3 +69,39 @@ auth:
   issuer: w-server
   # Token 目标受众标识。
   audience: w-server-client
+
+file:
+  # 单文件上传大小上限，单位字节。
+  maxSize: 10485760
+  # 允许浏览器直接预览的 MIME 类型列表。
+  previewMimeTypes:
+    - image/jpeg
+    - image/png
+    - image/webp
+    - application/pdf
+    - text/plain
+  # 允许上传的 MIME 类型白名单。
+  allowedMimeTypes:
+    - image/jpeg
+    - image/png
+    - image/webp
+    - application/pdf
+    - text/plain
+    - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+
+minio:
+  # 是否启用 MinIO 文件存储能力。
+  enabled: false
+  # MinIO 服务地址。
+  endpoint: 127.0.0.1
+  # MinIO 服务端口。
+  port: 9000
+  # 是否使用 HTTPS 连接 MinIO。
+  useSSL: false
+  # MinIO 访问账号。
+  accessKey: minioadmin
+  # MinIO 访问密钥。
+  # 敏感信息建议通过部署环境变量覆盖，不要直接提交真实生产密钥。
+  secretKey: minioadmin
+  # 文件默认存储桶名称。
+  bucket: w-server

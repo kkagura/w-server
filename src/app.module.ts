@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
 import { User } from './modules/user/user.entity';
 import { AuthModule } from './modules/auth/auth.module';
+import { FileModule } from './modules/file/file.module';
 import configuration from './config/configuration';
 import type { AppConfig } from './config/config.types';
 import { createTypeOrmOptions } from './config/typeorm.config';
@@ -20,6 +21,7 @@ import { RedisModule } from './redis/redis.module';
     }),
     RedisModule,
     AuthModule,
+    FileModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

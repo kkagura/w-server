@@ -35,6 +35,29 @@ const DEFAULT_AUTH_REFRESH_TOKEN_SECRET =
 const DEFAULT_AUTH_REFRESH_TOKEN_EXPIRES_IN = 604800;
 const DEFAULT_AUTH_ISSUER = 'w-server';
 const DEFAULT_AUTH_AUDIENCE = 'w-server-client';
+const DEFAULT_MINIO_ENABLED = false;
+const DEFAULT_MINIO_ENDPOINT = '127.0.0.1';
+const DEFAULT_MINIO_PORT = 9000;
+const DEFAULT_MINIO_USE_SSL = false;
+const DEFAULT_MINIO_ACCESS_KEY = 'minioadmin';
+const DEFAULT_MINIO_SECRET_KEY = 'minioadmin';
+const DEFAULT_MINIO_BUCKET = 'w-server';
+const DEFAULT_FILE_MAX_SIZE = 10 * 1024 * 1024;
+const DEFAULT_FILE_PREVIEW_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'application/pdf',
+  'text/plain',
+];
+const DEFAULT_FILE_ALLOWED_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'application/pdf',
+  'text/plain',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
 const CONFIG_DIR = 'config';
 const BASE_CONFIG_FILE = 'application.yml';
 
@@ -144,6 +167,28 @@ function parsePassword(value: unknown, defaultValue: string): string {
   return typeof value === 'string' ? value : defaultValue;
 }
 
+function parseStringArray(value: unknown, defaultValue: string[]): string[] {
+  if (Array.isArray(value)) {
+    const list = value
+      .filter((item): item is string => typeof item === 'string')
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    return list.length > 0 ? list : defaultValue;
+  }
+
+  if (typeof value === 'string') {
+    const list = value
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    return list.length > 0 ? list : defaultValue;
+  }
+
+  return defaultValue;
+}
+
 function loadConfig(): AppConfig {
   const env = process.env.NODE_ENV?.trim() || DEFAULT_ENV;
   const configRoot = join(process.cwd(), CONFIG_DIR);
@@ -156,6 +201,8 @@ function loadConfig(): AppConfig {
   const rawDatabase = isPlainObject(merged.database) ? merged.database : {};
   const rawRedis = isPlainObject(merged.redis) ? merged.redis : {};
   const rawAuth = isPlainObject(merged.auth) ? merged.auth : {};
+  const rawMinio = isPlainObject(merged.minio) ? merged.minio : {};
+  const rawFile = isPlainObject(merged.file) ? merged.file : {};
   const host = process.env.HOST ?? rawServer.host ?? DEFAULT_HOST;
   const port = parsePort(
     process.env.PORT ?? rawServer.port ?? DEFAULT_PORT,
@@ -214,6 +261,22 @@ function loadConfig(): AppConfig {
       rawAuth.refreshTokenExpiresIn ??
       DEFAULT_AUTH_REFRESH_TOKEN_EXPIRES_IN,
     'auth.refreshTokenExpiresIn',
+  );
+  const minioEnabled = parseBoolean(
+    process.env.MINIO_ENABLED ?? rawMinio.enabled ?? DEFAULT_MINIO_ENABLED,
+    'minio.enabled',
+  );
+  const minioPort = parsePort(
+    process.env.MINIO_PORT ?? rawMinio.port ?? DEFAULT_MINIO_PORT,
+    'minio.port',
+  );
+  const minioUseSSL = parseBoolean(
+    process.env.MINIO_USE_SSL ?? rawMinio.useSSL ?? DEFAULT_MINIO_USE_SSL,
+    'minio.useSSL',
+  );
+  const fileMaxSize = parsePositiveInteger(
+    process.env.FILE_MAX_SIZE ?? rawFile.maxSize ?? DEFAULT_FILE_MAX_SIZE,
+    'file.maxSize',
   );
 
   return {
@@ -296,6 +359,38 @@ function loadConfig(): AppConfig {
       audience: parseString(
         process.env.AUTH_AUDIENCE ?? rawAuth.audience,
         DEFAULT_AUTH_AUDIENCE,
+      ),
+    },
+    minio: {
+      enabled: minioEnabled,
+      endpoint: parseString(
+        process.env.MINIO_ENDPOINT ?? rawMinio.endpoint,
+        DEFAULT_MINIO_ENDPOINT,
+      ),
+      port: minioPort,
+      useSSL: minioUseSSL,
+      accessKey: parseString(
+        process.env.MINIO_ACCESS_KEY ?? rawMinio.accessKey,
+        DEFAULT_MINIO_ACCESS_KEY,
+      ),
+      secretKey: parseString(
+        process.env.MINIO_SECRET_KEY ?? rawMinio.secretKey,
+        DEFAULT_MINIO_SECRET_KEY,
+      ),
+      bucket: parseString(
+        process.env.MINIO_BUCKET ?? rawMinio.bucket,
+        DEFAULT_MINIO_BUCKET,
+      ),
+    },
+    file: {
+      maxSize: fileMaxSize,
+      previewMimeTypes: parseStringArray(
+        process.env.FILE_PREVIEW_MIME_TYPES ?? rawFile.previewMimeTypes,
+        DEFAULT_FILE_PREVIEW_MIME_TYPES,
+      ),
+      allowedMimeTypes: parseStringArray(
+        process.env.FILE_ALLOWED_MIME_TYPES ?? rawFile.allowedMimeTypes,
+        DEFAULT_FILE_ALLOWED_MIME_TYPES,
       ),
     },
   };
