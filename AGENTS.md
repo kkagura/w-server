@@ -30,6 +30,11 @@
 │  ├─ application.dev.yml  # 开发环境配置
 │  ├─ application.test.yml # 测试环境配置
 │  └─ application.prod.yml # 生产环境配置
+├─ docs/
+│  └─ openapi/             # OpenAPI 维护源目录（拆分文档）
+├─ docs-publish/           # OpenAPI 发布产物目录（构建生成）
+├─ scripts/
+│  └─ docs/                # 文档构建脚本
 ├─ src/
 │  ├─ config/
 │  │  ├─ config.types.ts   # 配置类型定义
@@ -50,6 +55,7 @@
 - 普通启动：`pnpm run start`
 - 生产启动：`pnpm run start:prod`
 - 构建：`pnpm run build`
+- 构建 OpenAPI 发布产物：`pnpm run docs:build`
 - 单元测试：`pnpm run test`
 - e2e 测试：`pnpm run test:e2e`
 
@@ -178,10 +184,23 @@ database:
 
 - 任何代码改动都必须同步更新对应文档，不允许只改代码不改文档
 - 如果改动涉及接口、请求参数、返回值、鉴权、错误响应、分页规则，必须同步更新 `docs/openapi/` 下对应的 OpenAPI 文档和相关说明文档
+- 如果改动涉及 OpenAPI 文档本身，除维护 `docs/openapi/` 外，还必须重新执行 `pnpm run docs:build`，同步更新 `docs-publish/`
 - 如果改动涉及配置、运行方式、目录结构、迁移命令、模块说明，也必须同步更新 `AGENTS.md`、`README.md` 或对应专题文档
 - 新增模块时，除了实现代码，还必须补齐该模块对应的文档
 - 修改既有行为时，必须检查旧文档是否仍然准确，若不准确必须一并修正
 - 若代码已修改但文档未同步更新，应视为任务未完成，不能结束交付
+
+## OpenAPI 文档发布规则
+
+- `docs/openapi/` 是 OpenAPI 文档维护源，供开发和 AI 修改
+- `docs-publish/` 是对外发布目录，供前端、AI、第三方平台直接读取
+- 每次修改 `docs/openapi/` 后，都必须重新执行 `pnpm run docs:build`
+- `docs:build` 会校验 YAML 语法与 `$ref` 引用，并生成以下文件：
+  - `docs-publish/openapi.yaml`
+  - `docs-publish/openapi.json`
+  - `docs-publish/index.html`
+  - `docs-publish/api-guide.md`
+- 若 `docs/openapi/` 已更新但 `docs-publish/` 未同步更新，应视为文档未完成
 
 ## 数据库迁移
 

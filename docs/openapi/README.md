@@ -16,6 +16,7 @@
 
 - 其他项目、工具或 AI 代理应优先读取根入口 `openapi.yaml`，不要直接把拆分文件当成主入口。
 - `api-guide.md` 是补充阅读说明，用来帮助 AI 更快理解鉴权、分页、文件流等约定；正式契约仍以 OpenAPI 为准。
+- 对外发布时，应通过 `pnpm run docs:build` 生成 `docs-publish/` 目录，再将 `docs-publish/` 作为静态站点发布。
 - 当前大多数接口受全局 JWT 守卫保护。
 - 公开接口通过 `security: []` 单独放行。
 - `GET /files/{id}/content` 返回二进制文件流，不是 JSON。

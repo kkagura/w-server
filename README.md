@@ -103,6 +103,37 @@ The project now includes an optional `ioredis` client connection.
 
 When you need to use Redis in business code, inject `RedisService` and call `getClient()` to obtain the raw `ioredis` client instance.
 
+## API Documentation Publishing
+
+OpenAPI source files are maintained under `docs/openapi/`, and public publish artifacts are generated into `docs-publish/`.
+
+```text
+docs/openapi/      # split OpenAPI source files
+docs-publish/      # generated public artifacts
+scripts/docs/      # document build scripts
+```
+
+Build publish artifacts locally with:
+
+```bash
+pnpm run docs:build
+```
+
+The command validates YAML syntax and `$ref` references, then generates:
+
+- `docs-publish/openapi.yaml`
+- `docs-publish/openapi.json`
+- `docs-publish/index.html`
+- `docs-publish/api-guide.md`
+- `docs-publish/.nojekyll`
+
+Recommended public hosting layout:
+
+- `https://docs.example.com/` -> `index.html`
+- `https://docs.example.com/openapi.yaml`
+- `https://docs.example.com/openapi.json`
+- `https://docs.example.com/api-guide.md`
+
 ## Run tests
 
 ```bash
