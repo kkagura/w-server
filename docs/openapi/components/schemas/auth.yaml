@@ -1,0 +1,61 @@
+LoginDto:
+  type: object
+  required:
+    - username
+    - password
+  properties:
+    username:
+      type: string
+      example: admin
+    password:
+      type: string
+      example: '123456'
+
+RefreshTokenDto:
+  type: object
+  required:
+    - refreshToken
+  properties:
+    refreshToken:
+      type: string
+      description: 由 /auth/login 或 /auth/refresh 下发的 JWT refreshToken。
+
+LoginResult:
+  type: object
+  required:
+    - accessToken
+    - refreshToken
+    - tokenType
+    - expiresIn
+    - user
+  properties:
+    accessToken:
+      type: string
+      description: 用于访问受保护接口的 JWT accessToken。
+    refreshToken:
+      type: string
+      description: 用于刷新 token 对的 JWT refreshToken。
+    tokenType:
+      type: string
+      enum:
+        - Bearer
+      example: Bearer
+    expiresIn:
+      type: integer
+      minimum: 1
+      description: accessToken 有效期，单位为秒。
+      example: 900
+    user:
+      $ref: './user.yaml#/PublicUser'
+
+AuthenticatedUser:
+  allOf:
+    - $ref: './user.yaml#/PublicUser'
+    - type: object
+      required:
+        - sessionId
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+          description: 当前 Redis 会话 ID。

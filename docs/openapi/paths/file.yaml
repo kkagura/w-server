@@ -1,0 +1,156 @@
+"/files":
+  get:
+    tags:
+      - 文件
+    summary: 获取文件分页列表
+    description: 该接口只返回文件元数据，不返回文件二进制内容。文件内容需通过 /files/{id}/content 获取。
+    operationId: listFiles
+    parameters:
+      - $ref: '../components/parameters/common.yaml#/Page'
+      - $ref: '../components/parameters/common.yaml#/PageSize'
+      - name: bizType
+        in: query
+        description: 按 bizType 精确匹配。
+        schema:
+          type: string
+      - name: bizId
+        in: query
+        description: 按 bizId 精确匹配。
+        schema:
+          type: string
+      - name: originalName
+        in: query
+        description: 按原始文件名模糊查询。
+        schema:
+          type: string
+      - name: status
+        in: query
+        description: 按文件状态过滤。
+        schema:
+          type: integer
+          enum: [0, 1, 2, 3]
+      - name: createdBy
+        in: query
+        description: 按上传人用户 ID 过滤。
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: 文件分页列表
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/file.yaml#/PublicStoredFileListResult'
+      '401':
+        $ref: '../components/responses/common.yaml#/Unauthorized'
+      '503':
+        $ref: '../components/responses/common.yaml#/ServiceUnavailable'
+
+"/files/upload":
+  post:
+    tags:
+      - 文件
+    summary: 上传文件
+    description: |
+      接收 multipart/form-data 请求，将文件内容上传到 MinIO，并把文件元数据写入 MySQL。
+      当前控制器没有显式设置 `@HttpCode()`，因此该 POST 接口默认返回 HTTP 201。
+    operationId: uploadFile
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            $ref: '../components/schemas/file.yaml#/UploadFileRequest'
+    responses:
+      '201':
+        description: 上传成功
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/file.yaml#/PublicStoredFile'
+      '400':
+        $ref: '../components/responses/common.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/common.yaml#/Unauthorized'
+      '415':
+        $ref: '../components/responses/common.yaml#/UnsupportedMediaType'
+      '503':
+        $ref: '../components/responses/common.yaml#/ServiceUnavailable'
+
+"/files/{id}":
+  parameters:
+    - $ref: '../components/parameters/common.yaml#/Id'
+
+  get:
+    tags:
+      - 文件
+    summary: 获取文件元数据
+    operationId: getFile
+    responses:
+      '200':
+        description: 文件元数据
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/file.yaml#/PublicStoredFile'
+      '400':
+        $ref: '../components/responses/common.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/common.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/common.yaml#/NotFound'
+      '503':
+        $ref: '../components/responses/common.yaml#/ServiceUnavailable'
+
+  delete:
+    tags:
+      - 文件
+    summary: 删除文件记录及对象
+    operationId: deleteFile
+    responses:
+      '200':
+        description: 删除成功
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/common.yaml#/SuccessResponse'
+      '400':
+        $ref: '../components/responses/common.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/common.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/common.yaml#/NotFound'
+      '503':
+        $ref: '../components/responses/common.yaml#/ServiceUnavailable'
+
+"/files/{id}/content":
+  parameters:
+    - $ref: '../components/parameters/common.yaml#/Id'
+    - $ref: '../components/parameters/common.yaml#/ContentMode'
+
+  get:
+    tags:
+      - 文件
+    summary: 获取文件内容流
+    description: |
+      将文件对象内容以流的方式写入响应。
+      实际响应头里的 Content-Type 以文件记录中的 mimeType 为准。
+      mode=preview 倾向于浏览器内联预览，mode=download 会强制下载。
+    operationId: getFileContent
+    responses:
+      '200':
+        description: 二进制文件流
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      '400':
+        $ref: '../components/responses/common.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/common.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/common.yaml#/NotFound'
+      '503':
+        $ref: '../components/responses/common.yaml#/ServiceUnavailable'

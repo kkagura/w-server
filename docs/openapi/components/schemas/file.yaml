@@ -1,0 +1,138 @@
+UploadFileRequest:
+  type: object
+  required:
+    - file
+  properties:
+    file:
+      type: string
+      format: binary
+      description: 通过 multipart/form-data 上传的二进制文件内容。
+    bizType:
+      type: string
+      nullable: true
+      example: user-avatar
+    bizId:
+      type: string
+      nullable: true
+      example: '1'
+    isPublic:
+      description: 支持传入 1、0、"1"、"0"、"true"、"false"。
+      oneOf:
+        - type: integer
+          enum: [0, 1]
+        - type: string
+          enum: ['0', '1', 'true', 'false']
+
+PublicStoredFile:
+  type: object
+  required:
+    - id
+    - originalName
+    - ext
+    - mimeType
+    - size
+    - etag
+    - sha256
+    - status
+    - isPublic
+    - bizType
+    - bizId
+    - createdBy
+    - createAt
+    - updateBy
+    - updateAt
+    - deleteAt
+    - contentUrl
+    - previewUrl
+    - downloadUrl
+  properties:
+    id:
+      type: integer
+      format: int64
+      example: 1
+    originalName:
+      type: string
+      example: avatar.png
+    ext:
+      type: string
+      example: png
+    mimeType:
+      type: string
+      example: image/png
+    size:
+      type: integer
+      format: int64
+      minimum: 0
+      example: 1024
+    etag:
+      type: string
+      nullable: true
+      example: 686897696a7c876b7e
+    sha256:
+      type: string
+      example: 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+    status:
+      type: integer
+      enum: [0, 1, 2, 3]
+      description: 0 表示上传中，1 表示可用，2 表示已删除，3 表示异常。
+      example: 1
+    isPublic:
+      type: integer
+      enum: [0, 1]
+      example: 0
+    bizType:
+      type: string
+      nullable: true
+      example: user-avatar
+    bizId:
+      type: string
+      nullable: true
+      example: '1'
+    createdBy:
+      type: integer
+      format: int64
+      nullable: true
+      example: 1
+    createAt:
+      type: string
+      format: date-time
+      example: '2026-04-14T08:00:00.000Z'
+    updateBy:
+      type: integer
+      format: int64
+      nullable: true
+      example: 1
+    updateAt:
+      type: string
+      format: date-time
+      example: '2026-04-14T08:00:00.000Z'
+    deleteAt:
+      type: string
+      format: date-time
+      nullable: true
+      example: null
+    contentUrl:
+      type: string
+      description: 文件内容访问的相对路径。
+      example: /files/1/content
+    previewUrl:
+      type: string
+      description: 文件预览模式的相对路径。
+      example: /files/1/content?mode=preview
+    downloadUrl:
+      type: string
+      description: 文件下载模式的相对路径。
+      example: /files/1/content?mode=download
+
+PublicStoredFileListResult:
+  type: object
+  required:
+    - list
+    - pagination
+  properties:
+    list:
+      type: array
+      items:
+        $ref: '#/PublicStoredFile'
+    pagination:
+      $ref: './common.yaml#/PaginationMeta'

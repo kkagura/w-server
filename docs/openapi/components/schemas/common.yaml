@@ -1,0 +1,58 @@
+SuccessResponse:
+  type: object
+  required:
+    - success
+  properties:
+    success:
+      type: boolean
+      enum: [true]
+      example: true
+
+PaginationMeta:
+  type: object
+  required:
+    - page
+    - pageSize
+    - total
+    - pageCount
+  properties:
+    page:
+      type: integer
+      minimum: 1
+      example: 1
+    pageSize:
+      type: integer
+      minimum: 1
+      maximum: 100
+      example: 10
+    total:
+      type: integer
+      minimum: 0
+      example: 42
+    pageCount:
+      type: integer
+      minimum: 0
+      example: 5
+
+ErrorResponse:
+  type: object
+  required:
+    - statusCode
+    - message
+    - error
+  properties:
+    statusCode:
+      type: integer
+      example: 401
+    message:
+      oneOf:
+        - type: string
+          example: 请求参数不合法。
+        - type: array
+          items:
+            type: string
+          example:
+            - 请求参数不合法。
+    error:
+      type: string
+      example: Unauthorized

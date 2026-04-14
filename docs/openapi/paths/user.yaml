@@ -1,0 +1,149 @@
+"/users":
+  post:
+    tags:
+      - 用户
+    summary: 创建用户
+    description: |
+      创建用户记录，并在保存前对提交的密码做哈希处理。
+      当前控制器没有显式设置 `@HttpCode()`，因此该 POST 接口默认返回 HTTP 201。
+    operationId: createUser
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/user.yaml#/CreateUserDto'
+          example:
+            username: admin
+            password: '123456'
+            nickname: Administrator
+            email: admin@example.com
+            mobile: '13800000000'
+            avatar: https://cdn.example.com/avatar.png
+    responses:
+      '201':
+        description: 创建成功
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/user.yaml#/PublicUser'
+      '401':
+        $ref: '../components/responses/common.yaml#/Unauthorized'
+      '503':
+        $ref: '../components/responses/common.yaml#/ServiceUnavailable'
+
+  get:
+    tags:
+      - 用户
+    summary: 获取用户分页列表
+    description: 返回统一分页结构的用户列表。
+    operationId: listUsers
+    parameters:
+      - $ref: '../components/parameters/common.yaml#/Page'
+      - $ref: '../components/parameters/common.yaml#/PageSize'
+      - name: username
+        in: query
+        description: 按用户名模糊查询。
+        schema:
+          type: string
+      - name: nickname
+        in: query
+        description: 按昵称模糊查询。
+        schema:
+          type: string
+      - name: status
+        in: query
+        description: 按用户状态过滤。
+        schema:
+          type: integer
+          example: 1
+    responses:
+      '200':
+        description: 用户分页列表
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/user.yaml#/PublicUserListResult'
+      '401':
+        $ref: '../components/responses/common.yaml#/Unauthorized'
+      '503':
+        $ref: '../components/responses/common.yaml#/ServiceUnavailable'
+
+"/users/{id}":
+  parameters:
+    - $ref: '../components/parameters/common.yaml#/Id'
+
+  get:
+    tags:
+      - 用户
+    summary: 获取单个用户
+    operationId: getUser
+    responses:
+      '200':
+        description: 用户详情
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/user.yaml#/PublicUser'
+      '400':
+        $ref: '../components/responses/common.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/common.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/common.yaml#/NotFound'
+      '503':
+        $ref: '../components/responses/common.yaml#/ServiceUnavailable'
+
+  patch:
+    tags:
+      - 用户
+    summary: 更新用户
+    operationId: updateUser
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/user.yaml#/UpdateUserDto'
+          example:
+            nickname: New nickname
+            email: updated@example.com
+            mobile: '13900000000'
+            avatar: https://cdn.example.com/new-avatar.png
+            status: 1
+    responses:
+      '200':
+        description: 更新后的用户信息
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/user.yaml#/PublicUser'
+      '400':
+        $ref: '../components/responses/common.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/common.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/common.yaml#/NotFound'
+      '503':
+        $ref: '../components/responses/common.yaml#/ServiceUnavailable'
+
+  delete:
+    tags:
+      - 用户
+    summary: 软删除用户
+    operationId: deleteUser
+    responses:
+      '200':
+        description: 删除成功
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/common.yaml#/SuccessResponse'
+      '400':
+        $ref: '../components/responses/common.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/common.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/common.yaml#/NotFound'
+      '503':
+        $ref: '../components/responses/common.yaml#/ServiceUnavailable'

@@ -1,0 +1,104 @@
+"/auth/login":
+  post:
+    tags:
+      - 认证
+    summary: 用户名密码登录
+    description: |
+      创建基于 Redis 的登录会话，并同时返回 accessToken 与 refreshToken。
+      当前控制器没有显式设置 `@HttpCode()`，因此该 POST 接口默认返回 HTTP 201。
+    operationId: login
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/auth.yaml#/LoginDto'
+          example:
+            username: admin
+            password: '123456'
+    responses:
+      '201':
+        description: 登录成功
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/auth.yaml#/LoginResult'
+      '400':
+        $ref: '../components/responses/common.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/common.yaml#/Unauthorized'
+      '503':
+        $ref: '../components/responses/common.yaml#/ServiceUnavailable'
+
+"/auth/refresh":
+  post:
+    tags:
+      - 认证
+    summary: 刷新当前 token 对
+    description: |
+      校验 refreshToken，确认 Redis 会话有效后，重新签发 accessToken 与 refreshToken。
+      当前控制器没有显式设置 `@HttpCode()`，因此该 POST 接口默认返回 HTTP 201。
+    operationId: refreshToken
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/auth.yaml#/RefreshTokenDto'
+          example:
+            refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.refresh.token
+    responses:
+      '201':
+        description: 刷新成功
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/auth.yaml#/LoginResult'
+      '400':
+        $ref: '../components/responses/common.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/common.yaml#/Unauthorized'
+      '503':
+        $ref: '../components/responses/common.yaml#/ServiceUnavailable'
+
+"/auth/logout":
+  post:
+    tags:
+      - 认证
+    summary: 登出当前会话
+    description: |
+      删除当前 accessToken 对应的 Redis 会话。
+      当前控制器没有显式设置 `@HttpCode()`，因此该 POST 接口默认返回 HTTP 201。
+    operationId: logout
+    responses:
+      '201':
+        description: 登出成功
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/common.yaml#/SuccessResponse'
+      '401':
+        $ref: '../components/responses/common.yaml#/Unauthorized'
+      '503':
+        $ref: '../components/responses/common.yaml#/ServiceUnavailable'
+
+"/auth/me":
+  get:
+    tags:
+      - 认证
+    summary: 获取当前登录用户
+    description: 返回当前用户的公开字段，以及当前会话的 sessionId。
+    operationId: getCurrentUser
+    responses:
+      '200':
+        description: 当前登录用户信息
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/auth.yaml#/AuthenticatedUser'
+      '401':
+        $ref: '../components/responses/common.yaml#/Unauthorized'
+      '503':
+        $ref: '../components/responses/common.yaml#/ServiceUnavailable'

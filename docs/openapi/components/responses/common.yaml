@@ -1,0 +1,54 @@
+BadRequest:
+  description: 请求参数或请求体不合法。
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common.yaml#/ErrorResponse'
+      example:
+        statusCode: 400
+        message: 请求参数不合法。
+        error: Bad Request
+
+Unauthorized:
+  description: 鉴权缺失、格式错误、已过期或会话失效。
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common.yaml#/ErrorResponse'
+      example:
+        statusCode: 401
+        message: 登录状态无效。
+        error: Unauthorized
+
+NotFound:
+  description: 请求的资源不存在。
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common.yaml#/ErrorResponse'
+      example:
+        statusCode: 404
+        message: 资源不存在。
+        error: Not Found
+
+UnsupportedMediaType:
+  description: 上传文件类型不被允许。
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common.yaml#/ErrorResponse'
+      example:
+        statusCode: 415
+        message: 文件类型不被允许。
+        error: Unsupported Media Type
+
+ServiceUnavailable:
+  description: 当前操作依赖的基础设施未启用或暂不可用。
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common.yaml#/ErrorResponse'
+      example:
+        statusCode: 503
+        message: 当前依赖服务不可用。
+        error: Service Unavailable

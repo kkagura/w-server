@@ -1,0 +1,145 @@
+PublicUser:
+  type: object
+  required:
+    - id
+    - username
+    - nickname
+    - email
+    - mobile
+    - avatar
+    - status
+    - loginIp
+    - loginAt
+    - createBy
+    - createAt
+    - updateBy
+    - updateAt
+    - deleteAt
+  properties:
+    id:
+      type: integer
+      format: int64
+      example: 1
+    username:
+      type: string
+      example: admin
+    nickname:
+      type: string
+      nullable: true
+      example: Administrator
+    email:
+      type: string
+      format: email
+      nullable: true
+      example: admin@example.com
+    mobile:
+      type: string
+      nullable: true
+      example: '13800000000'
+    avatar:
+      type: string
+      nullable: true
+      example: https://cdn.example.com/avatar.png
+    status:
+      type: integer
+      description: 1 表示启用，其他值在鉴权时会被视为禁用状态。
+      example: 1
+    loginIp:
+      type: string
+      nullable: true
+      example: 127.0.0.1
+    loginAt:
+      type: string
+      format: date-time
+      nullable: true
+      example: '2026-04-14T08:00:00.000Z'
+    createBy:
+      type: integer
+      format: int64
+      nullable: true
+      example: null
+    createAt:
+      type: string
+      format: date-time
+      example: '2026-04-14T08:00:00.000Z'
+    updateBy:
+      type: integer
+      format: int64
+      nullable: true
+      example: null
+    updateAt:
+      type: string
+      format: date-time
+      example: '2026-04-14T08:00:00.000Z'
+    deleteAt:
+      type: string
+      format: date-time
+      nullable: true
+      example: null
+
+CreateUserDto:
+  type: object
+  required:
+    - username
+    - password
+  properties:
+    username:
+      type: string
+      example: admin
+    password:
+      type: string
+      example: '123456'
+    nickname:
+      type: string
+      nullable: true
+      example: Administrator
+    email:
+      type: string
+      format: email
+      nullable: true
+      example: admin@example.com
+    mobile:
+      type: string
+      nullable: true
+      example: '13800000000'
+    avatar:
+      type: string
+      nullable: true
+      example: https://cdn.example.com/avatar.png
+
+UpdateUserDto:
+  type: object
+  properties:
+    nickname:
+      type: string
+      nullable: true
+      example: Updated nickname
+    email:
+      type: string
+      format: email
+      nullable: true
+      example: updated@example.com
+    mobile:
+      type: string
+      nullable: true
+      example: '13900000000'
+    avatar:
+      type: string
+      nullable: true
+      example: https://cdn.example.com/new-avatar.png
+    status:
+      type: integer
+      example: 1
+
+PublicUserListResult:
+  type: object
+  required:
+    - list
+    - pagination
+  properties:
+    list:
+      type: array
+      items:
+        $ref: '#/PublicUser'
+    pagination:
+      $ref: './common.yaml#/PaginationMeta'

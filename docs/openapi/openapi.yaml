@@ -1,0 +1,99 @@
+openapi: 3.0.3
+info:
+  title: w-server 接口文档
+  version: 1.0.0
+  description: |
+    本文件描述当前仓库中 NestJS 控制器对外暴露的接口契约。
+    其他项目、工具或 AI 应统一从这里读取接口定义。
+servers:
+  - url: http://localhost:3000
+    description: 默认本地服务地址
+tags:
+  - name: 应用
+    description: 基础探活与应用级接口
+  - name: 认证
+    description: 登录、刷新、登出与当前用户接口
+  - name: 用户
+    description: 用户管理接口
+  - name: 文件
+    description: 文件存储与文件元数据接口
+security:
+  - BearerAuth: []
+paths:
+  /:
+    $ref: './paths/app.yaml#/~1'
+  /auth/login:
+    $ref: './paths/auth.yaml#/~1auth~1login'
+  /auth/refresh:
+    $ref: './paths/auth.yaml#/~1auth~1refresh'
+  /auth/logout:
+    $ref: './paths/auth.yaml#/~1auth~1logout'
+  /auth/me:
+    $ref: './paths/auth.yaml#/~1auth~1me'
+  /users:
+    $ref: './paths/user.yaml#/~1users'
+  /users/{id}:
+    $ref: './paths/user.yaml#/~1users~1{id}'
+  /files:
+    $ref: './paths/file.yaml#/~1files'
+  /files/upload:
+    $ref: './paths/file.yaml#/~1files~1upload'
+  /files/{id}:
+    $ref: './paths/file.yaml#/~1files~1{id}'
+  /files/{id}/content:
+    $ref: './paths/file.yaml#/~1files~1{id}~1content'
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Id:
+      $ref: './components/parameters/common.yaml#/Id'
+    Page:
+      $ref: './components/parameters/common.yaml#/Page'
+    PageSize:
+      $ref: './components/parameters/common.yaml#/PageSize'
+    ContentMode:
+      $ref: './components/parameters/common.yaml#/ContentMode'
+  responses:
+    BadRequest:
+      $ref: './components/responses/common.yaml#/BadRequest'
+    Unauthorized:
+      $ref: './components/responses/common.yaml#/Unauthorized'
+    NotFound:
+      $ref: './components/responses/common.yaml#/NotFound'
+    UnsupportedMediaType:
+      $ref: './components/responses/common.yaml#/UnsupportedMediaType'
+    ServiceUnavailable:
+      $ref: './components/responses/common.yaml#/ServiceUnavailable'
+  schemas:
+    SuccessResponse:
+      $ref: './components/schemas/common.yaml#/SuccessResponse'
+    PaginationMeta:
+      $ref: './components/schemas/common.yaml#/PaginationMeta'
+    ErrorResponse:
+      $ref: './components/schemas/common.yaml#/ErrorResponse'
+    LoginDto:
+      $ref: './components/schemas/auth.yaml#/LoginDto'
+    RefreshTokenDto:
+      $ref: './components/schemas/auth.yaml#/RefreshTokenDto'
+    LoginResult:
+      $ref: './components/schemas/auth.yaml#/LoginResult'
+    AuthenticatedUser:
+      $ref: './components/schemas/auth.yaml#/AuthenticatedUser'
+    CreateUserDto:
+      $ref: './components/schemas/user.yaml#/CreateUserDto'
+    UpdateUserDto:
+      $ref: './components/schemas/user.yaml#/UpdateUserDto'
+    PublicUser:
+      $ref: './components/schemas/user.yaml#/PublicUser'
+    PublicUserListResult:
+      $ref: './components/schemas/user.yaml#/PublicUserListResult'
+    UploadFileRequest:
+      $ref: './components/schemas/file.yaml#/UploadFileRequest'
+    PublicStoredFile:
+      $ref: './components/schemas/file.yaml#/PublicStoredFile'
+    PublicStoredFileListResult:
+      $ref: './components/schemas/file.yaml#/PublicStoredFileListResult'
