@@ -85,8 +85,6 @@ components:
       $ref: './components/schemas/auth.yaml#/AuthenticatedUser'
     CreateUserDto:
       $ref: './components/schemas/user.yaml#/CreateUserDto'
-    UpdateUserDto:
-      $ref: './components/schemas/user.yaml#/UpdateUserDto'
     PublicUser:
       $ref: './components/schemas/user.yaml#/PublicUser'
     PublicUserListResult:

@@ -4,17 +4,12 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
   Query,
   ParseIntPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import type {
-  CreateUserDto,
-  UpdateUserDto,
-  UserQueryDto,
-} from './user.service';
+import type { CreateUserDto, UserQueryDto } from './user.service';
 import { toPublicUser, toPublicUsers } from './user.presenter';
 
 @Controller('users')
@@ -34,14 +29,6 @@ export class UserController {
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return toPublicUser(await this.userService.findOne(id));
-  }
-
-  @Patch(':id')
-  async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateUserDto,
-  ) {
-    return toPublicUser(await this.userService.update(id, dto));
   }
 
   @Delete(':id')

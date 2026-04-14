@@ -107,30 +107,6 @@ CreateUserDto:
       nullable: true
       example: https://cdn.example.com/avatar.png
 
-UpdateUserDto:
-  type: object
-  properties:
-    nickname:
-      type: string
-      nullable: true
-      example: Updated nickname
-    email:
-      type: string
-      format: email
-      nullable: true
-      example: updated@example.com
-    mobile:
-      type: string
-      nullable: true
-      example: '13900000000'
-    avatar:
-      type: string
-      nullable: true
-      example: https://cdn.example.com/new-avatar.png
-    status:
-      type: integer
-      example: 1
-
 PublicUserListResult:
   type: object
   required:

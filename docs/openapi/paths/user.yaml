@@ -94,39 +94,6 @@
       '503':
         $ref: '../components/responses/common.yaml#/ServiceUnavailable'
 
-  patch:
-    tags:
-      - 用户
-    summary: 更新用户
-    operationId: updateUser
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '../components/schemas/user.yaml#/UpdateUserDto'
-          example:
-            nickname: New nickname
-            email: updated@example.com
-            mobile: '13900000000'
-            avatar: https://cdn.example.com/new-avatar.png
-            status: 1
-    responses:
-      '200':
-        description: 更新后的用户信息
-        content:
-          application/json:
-            schema:
-              $ref: '../components/schemas/user.yaml#/PublicUser'
-      '400':
-        $ref: '../components/responses/common.yaml#/BadRequest'
-      '401':
-        $ref: '../components/responses/common.yaml#/Unauthorized'
-      '404':
-        $ref: '../components/responses/common.yaml#/NotFound'
-      '503':
-        $ref: '../components/responses/common.yaml#/ServiceUnavailable'
-
   delete:
     tags:
       - 用户

@@ -20,14 +20,6 @@ export interface CreateUserDto {
   avatar?: string;
 }
 
-export interface UpdateUserDto {
-  nickname?: string;
-  email?: string;
-  mobile?: string;
-  avatar?: string;
-  status?: number;
-}
-
 export interface UserQueryDto extends PaginationParams {
   username?: string;
   nickname?: string;
@@ -81,12 +73,6 @@ export class UserService {
       throw new NotFoundException(`User #${id} not found`);
     }
     return user;
-  }
-
-  async update(id: number, dto: UpdateUserDto): Promise<User> {
-    const user = await this.findOne(id);
-    Object.assign(user, dto);
-    return this.userRepo.save(user);
   }
 
   async remove(id: number): Promise<void> {
