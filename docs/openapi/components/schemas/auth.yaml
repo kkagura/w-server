@@ -3,6 +3,8 @@ LoginDto:
   required:
     - username
     - password
+    - captchaId
+    - captchaCode
   properties:
     username:
       type: string
@@ -10,6 +12,33 @@ LoginDto:
     password:
       type: string
       example: '123456'
+    captchaId:
+      type: string
+      format: uuid
+      description: 通过 /auth/captcha 获取的一次性验证码标识。
+    captchaCode:
+      type: string
+      description: 用户输入的验证码文本，不区分大小写。
+
+CaptchaResult:
+  type: object
+  required:
+    - captchaId
+    - captchaSvg
+    - expiresIn
+  properties:
+    captchaId:
+      type: string
+      format: uuid
+      description: 一次性验证码标识，登录时需原样提交。
+    captchaSvg:
+      type: string
+      description: SVG 格式验证码内容，可直接嵌入页面展示。
+    expiresIn:
+      type: integer
+      minimum: 1
+      description: 验证码有效期，单位秒。
+      example: 120
 
 RefreshTokenDto:
   type: object
@@ -18,7 +47,7 @@ RefreshTokenDto:
   properties:
     refreshToken:
       type: string
-      description: 由 /auth/login 或 /auth/refresh 下发的 JWT refreshToken。
+      description: 由 /auth/login 或 /auth/refresh 返回的 JWT refreshToken。
 
 LoginResult:
   type: object
@@ -43,7 +72,7 @@ LoginResult:
     expiresIn:
       type: integer
       minimum: 1
-      description: accessToken 有效期，单位为秒。
+      description: accessToken 有效期，单位秒。
       example: 900
     user:
       $ref: './user.yaml#/PublicUser'

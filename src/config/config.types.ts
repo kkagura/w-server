@@ -30,6 +30,18 @@ export interface AuthConfig {
   refreshTokenExpiresIn: number;
   issuer: string;
   audience: string;
+  captcha: AuthCaptchaConfig;
+}
+
+export interface AuthCaptchaConfig {
+  enabled: boolean;
+  ttlSeconds: number;
+  size: number;
+  width: number;
+  height: number;
+  noise: number;
+  ignoreChars: string;
+  background: string;
 }
 
 export interface MinioConfig {

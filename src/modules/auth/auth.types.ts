@@ -27,3 +27,9 @@ export interface LoginResult {
   expiresIn: number;
   user: PublicUser;
 }
+
+export interface CaptchaResult {
+  captchaId: string;
+  captchaSvg: string;
+  expiresIn: number;
+}

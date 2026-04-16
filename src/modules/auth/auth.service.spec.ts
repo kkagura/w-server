@@ -1,6 +1,7 @@
 import { JwtService } from '@nestjs/jwt';
 import type { ConfigService } from '@nestjs/config';
 import type { Redis } from 'ioredis';
+import svgCaptcha from 'svg-captcha';
 import type { AppConfig, AuthConfig } from '../../config/config.types';
 import { RedisService } from '../../redis/redis.service';
 import type { User } from '../user/user.entity';
@@ -36,6 +37,16 @@ describe('AuthService', () => {
     refreshTokenExpiresIn: 604800,
     issuer: 'w-server-test',
     audience: 'w-server-test-client',
+    captcha: {
+      enabled: true,
+      ttlSeconds: 120,
+      size: 4,
+      width: 120,
+      height: 40,
+      noise: 1,
+      ignoreChars: '0Oo1iIlL',
+      background: '#f7f7f7',
+    },
   };
 
   let service: AuthService;
@@ -47,6 +58,11 @@ describe('AuthService', () => {
   let user: User;
 
   beforeEach(async () => {
+    jest.spyOn(svgCaptcha, 'create').mockReturnValue({
+      text: 'AbCd',
+      data: '<svg>captcha</svg>',
+    });
+
     const salt = generatePasswordSalt();
     const password = await hashPassword('123456', salt);
 
@@ -95,8 +111,14 @@ describe('AuthService', () => {
   });
 
   it('should login, validate access token, refresh and logout session', async () => {
+    const captcha = await service.generateCaptcha('127.0.0.1');
     const loginResult = await service.login(
-      { username: 'admin', password: '123456' },
+      {
+        username: 'admin',
+        password: '123456',
+        captchaId: captcha.captchaId,
+        captchaCode: 'AbCd',
+      },
       '127.0.0.1',
     );
 
@@ -135,9 +157,15 @@ describe('AuthService', () => {
     } as User;
 
     userService.findForAuthByUsername.mockResolvedValueOnce(legacyUser);
+    const captcha = await service.generateCaptcha(null);
 
     const loginResult = await service.login(
-      { username: 'admin', password: 'legacy-password' },
+      {
+        username: 'admin',
+        password: 'legacy-password',
+        captchaId: captcha.captchaId,
+        captchaCode: 'AbCd',
+      },
       null,
     );
 
@@ -150,8 +178,14 @@ describe('AuthService', () => {
   });
 
   it('should validate access token when redis session userId is stored as string', async () => {
+    const captcha = await service.generateCaptcha('127.0.0.1');
     const loginResult = await service.login(
-      { username: 'admin', password: '123456' },
+      {
+        username: 'admin',
+        password: '123456',
+        captchaId: captcha.captchaId,
+        captchaCode: 'AbCd',
+      },
       '127.0.0.1',
     );
     const accessPayload = await jwtService.verifyAsync<AuthTokenPayload>(
@@ -182,5 +216,25 @@ describe('AuthService', () => {
       username: 'admin',
       sessionId: accessPayload.sessionId,
     });
+  });
+
+  it('should reject login when captcha is invalid', async () => {
+    const captcha = await service.generateCaptcha('127.0.0.1');
+
+    await expect(
+      service.login(
+        {
+          username: 'admin',
+          password: '123456',
+          captchaId: captcha.captchaId,
+          captchaCode: 'fail',
+        },
+        '127.0.0.1',
+      ),
+    ).rejects.toThrow('验证码错误');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 });

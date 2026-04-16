@@ -35,6 +35,14 @@ const DEFAULT_AUTH_REFRESH_TOKEN_SECRET =
 const DEFAULT_AUTH_REFRESH_TOKEN_EXPIRES_IN = 604800;
 const DEFAULT_AUTH_ISSUER = 'w-server';
 const DEFAULT_AUTH_AUDIENCE = 'w-server-client';
+const DEFAULT_AUTH_CAPTCHA_ENABLED = true;
+const DEFAULT_AUTH_CAPTCHA_TTL_SECONDS = 120;
+const DEFAULT_AUTH_CAPTCHA_SIZE = 4;
+const DEFAULT_AUTH_CAPTCHA_WIDTH = 120;
+const DEFAULT_AUTH_CAPTCHA_HEIGHT = 40;
+const DEFAULT_AUTH_CAPTCHA_NOISE = 2;
+const DEFAULT_AUTH_CAPTCHA_IGNORE_CHARS = '0Oo1iIlL';
+const DEFAULT_AUTH_CAPTCHA_BACKGROUND = '#f7f7f7';
 const DEFAULT_MINIO_ENABLED = false;
 const DEFAULT_MINIO_ENDPOINT = '127.0.0.1';
 const DEFAULT_MINIO_PORT = 9000;
@@ -201,6 +209,7 @@ function loadConfig(): AppConfig {
   const rawDatabase = isPlainObject(merged.database) ? merged.database : {};
   const rawRedis = isPlainObject(merged.redis) ? merged.redis : {};
   const rawAuth = isPlainObject(merged.auth) ? merged.auth : {};
+  const rawAuthCaptcha = isPlainObject(rawAuth.captcha) ? rawAuth.captcha : {};
   const rawMinio = isPlainObject(merged.minio) ? merged.minio : {};
   const rawFile = isPlainObject(merged.file) ? merged.file : {};
   const host = process.env.HOST ?? rawServer.host ?? DEFAULT_HOST;
@@ -261,6 +270,30 @@ function loadConfig(): AppConfig {
       rawAuth.refreshTokenExpiresIn ??
       DEFAULT_AUTH_REFRESH_TOKEN_EXPIRES_IN,
     'auth.refreshTokenExpiresIn',
+  );
+  const authCaptchaEnabled = parseBoolean(
+    rawAuthCaptcha.enabled ?? DEFAULT_AUTH_CAPTCHA_ENABLED,
+    'auth.captcha.enabled',
+  );
+  const authCaptchaTtlSeconds = parsePositiveInteger(
+    rawAuthCaptcha.ttlSeconds ?? DEFAULT_AUTH_CAPTCHA_TTL_SECONDS,
+    'auth.captcha.ttlSeconds',
+  );
+  const authCaptchaSize = parsePositiveInteger(
+    rawAuthCaptcha.size ?? DEFAULT_AUTH_CAPTCHA_SIZE,
+    'auth.captcha.size',
+  );
+  const authCaptchaWidth = parsePositiveInteger(
+    rawAuthCaptcha.width ?? DEFAULT_AUTH_CAPTCHA_WIDTH,
+    'auth.captcha.width',
+  );
+  const authCaptchaHeight = parsePositiveInteger(
+    rawAuthCaptcha.height ?? DEFAULT_AUTH_CAPTCHA_HEIGHT,
+    'auth.captcha.height',
+  );
+  const authCaptchaNoise = parseNonNegativeInteger(
+    rawAuthCaptcha.noise ?? DEFAULT_AUTH_CAPTCHA_NOISE,
+    'auth.captcha.noise',
   );
   const minioEnabled = parseBoolean(
     process.env.MINIO_ENABLED ?? rawMinio.enabled ?? DEFAULT_MINIO_ENABLED,
@@ -360,6 +393,22 @@ function loadConfig(): AppConfig {
         process.env.AUTH_AUDIENCE ?? rawAuth.audience,
         DEFAULT_AUTH_AUDIENCE,
       ),
+      captcha: {
+        enabled: authCaptchaEnabled,
+        ttlSeconds: authCaptchaTtlSeconds,
+        size: authCaptchaSize,
+        width: authCaptchaWidth,
+        height: authCaptchaHeight,
+        noise: authCaptchaNoise,
+        ignoreChars: parsePassword(
+          rawAuthCaptcha.ignoreChars,
+          DEFAULT_AUTH_CAPTCHA_IGNORE_CHARS,
+        ),
+        background: parseString(
+          rawAuthCaptcha.background,
+          DEFAULT_AUTH_CAPTCHA_BACKGROUND,
+        ),
+      },
     },
     minio: {
       enabled: minioEnabled,

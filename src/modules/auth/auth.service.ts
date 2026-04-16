@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService, type JwtSignOptions } from '@nestjs/jwt';
 import { createHash, randomUUID } from 'node:crypto';
 import type { Redis } from 'ioredis';
+import svgCaptcha from 'svg-captcha';
 import type { AppConfig, AuthConfig } from '../../config/config.types';
 import { RedisService } from '../../redis/redis.service';
 import { UserService } from '../user/user.service';
@@ -15,13 +16,23 @@ import { toPublicUser } from '../user/user.presenter';
 import type { User } from '../user/user.entity';
 import type {
   AuthenticatedUser,
+  CaptchaResult,
   AuthSession,
   AuthTokenPayload,
   LoginResult,
 } from './auth.types';
-import { AUTH_SESSION_KEY_PREFIX } from './auth.constants';
+import {
+  AUTH_CAPTCHA_KEY_PREFIX,
+  AUTH_SESSION_KEY_PREFIX,
+} from './auth.constants';
 import { hashPassword, verifyPassword } from './password.util';
 import type { LoginDto } from './login.dto';
+
+interface StoredCaptcha {
+  answerHash: string;
+  ip: string | null;
+  createdAt: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -32,9 +43,41 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  async generateCaptcha(requestIp: string | null): Promise<CaptchaResult> {
+    const captchaConfig = this.getAuthConfig().captcha;
+
+    if (!captchaConfig.enabled) {
+      throw new ServiceUnavailableException('验证码功能未启用');
+    }
+
+    const captcha = svgCaptcha.create({
+      size: captchaConfig.size,
+      width: captchaConfig.width,
+      height: captchaConfig.height,
+      noise: captchaConfig.noise,
+      ignoreChars: captchaConfig.ignoreChars,
+      background: captchaConfig.background,
+      color: true,
+    });
+    const captchaId = randomUUID();
+
+    await this.saveCaptcha(captchaId, captcha.text, requestIp);
+
+    return {
+      captchaId,
+      captchaSvg: captcha.data,
+      expiresIn: captchaConfig.ttlSeconds,
+    };
+  }
+
   async login(dto: LoginDto, loginIp: string | null): Promise<LoginResult> {
     const username = this.normalizeCredential(dto.username, '用户名');
     const password = this.normalizeCredential(dto.password, '密码');
+    const captchaId = this.normalizeCredential(dto.captchaId, '验证码标识');
+    const captchaCode = this.normalizeCredential(dto.captchaCode, '验证码');
+
+    await this.validateCaptcha(captchaId, captchaCode, loginIp);
+
     const user = await this.userService.findForAuthByUsername(username);
 
     if (!user) {
@@ -172,6 +215,10 @@ export class AuthService {
     return `${AUTH_SESSION_KEY_PREFIX}:${sessionId}`;
   }
 
+  private getCaptchaKey(captchaId: string): string {
+    return `${AUTH_CAPTCHA_KEY_PREFIX}:${captchaId}`;
+  }
+
   private async saveSession(
     user: User,
     sessionId: string,
@@ -215,6 +262,77 @@ export class AuthService {
     const redis = this.getRedisClient();
 
     await redis.del(this.getSessionKey(sessionId));
+  }
+
+  private async saveCaptcha(
+    captchaId: string,
+    captchaText: string,
+    requestIp: string | null,
+  ): Promise<void> {
+    const redis = this.getRedisClient();
+    const captchaConfig = this.getAuthConfig().captcha;
+    const payload: StoredCaptcha = {
+      answerHash: this.hashCaptchaCode(captchaText),
+      ip: requestIp,
+      createdAt: new Date().toISOString(),
+    };
+
+    await redis.set(
+      this.getCaptchaKey(captchaId),
+      JSON.stringify(payload),
+      'EX',
+      captchaConfig.ttlSeconds,
+    );
+  }
+
+  private async getCaptcha(captchaId: string): Promise<StoredCaptcha | null> {
+    const redis = this.getRedisClient();
+    const rawValue = await redis.get(this.getCaptchaKey(captchaId));
+
+    if (!rawValue) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(rawValue) as StoredCaptcha;
+    } catch {
+      await this.deleteCaptcha(captchaId);
+      return null;
+    }
+  }
+
+  private async deleteCaptcha(captchaId: string): Promise<void> {
+    const redis = this.getRedisClient();
+
+    await redis.del(this.getCaptchaKey(captchaId));
+  }
+
+  private async validateCaptcha(
+    captchaId: string,
+    captchaCode: string,
+    requestIp: string | null,
+  ): Promise<void> {
+    const captchaConfig = this.getAuthConfig().captcha;
+
+    if (!captchaConfig.enabled) {
+      return;
+    }
+
+    const captcha = await this.getCaptcha(captchaId);
+
+    if (!captcha) {
+      throw new UnauthorizedException('验证码不存在或已过期');
+    }
+
+    await this.deleteCaptcha(captchaId);
+
+    if (captcha.ip && requestIp && captcha.ip !== requestIp) {
+      throw new UnauthorizedException('验证码校验失败');
+    }
+
+    if (captcha.answerHash !== this.hashCaptchaCode(captchaCode)) {
+      throw new UnauthorizedException('验证码错误');
+    }
   }
 
   private async signAccessToken(user: User, sessionId: string): Promise<string> {
@@ -305,6 +423,12 @@ export class AuthService {
 
   private hashToken(token: string): string {
     return createHash('sha256').update(token).digest('hex');
+  }
+
+  private hashCaptchaCode(code: string): string {
+    return createHash('sha256')
+      .update(code.trim().toLowerCase())
+      .digest('hex');
   }
 
   private ensureUserEnabled(user: User): void {

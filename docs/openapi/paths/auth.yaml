@@ -1,3 +1,23 @@
+"/auth/captcha":
+  get:
+    tags:
+      - 认证
+    summary: 获取登录验证码
+    description: |
+      生成一张 SVG 验证码，并在 Redis 中保存一次性校验记录。
+      客户端应先获取验证码，再调用登录接口提交 `captchaId` 与 `captchaCode`。
+    operationId: getLoginCaptcha
+    security: []
+    responses:
+      '200':
+        description: 获取成功
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/auth.yaml#/CaptchaResult'
+      '503':
+        $ref: '../components/responses/common.yaml#/ServiceUnavailable'
+
 "/auth/login":
   post:
     tags:
@@ -17,6 +37,8 @@
           example:
             username: admin
             password: '123456'
+            captchaId: 4b6108bc-84b0-486c-ae5a-4ac5fb4c4cbf
+            captchaCode: aB3d
     responses:
       '201':
         description: 登录成功

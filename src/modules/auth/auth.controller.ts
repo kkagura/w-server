@@ -12,6 +12,12 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
+  @Get('captcha')
+  captcha(@Req() request: Request) {
+    return this.authService.generateCaptcha(this.getRequestIp(request));
+  }
+
+  @Public()
   @Post('login')
   login(@Body() dto: LoginDto, @Req() request: Request) {
     return this.authService.login(dto, this.getRequestIp(request));

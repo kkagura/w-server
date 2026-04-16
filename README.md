@@ -103,6 +103,15 @@ The project now includes an optional `ioredis` client connection.
 
 When you need to use Redis in business code, inject `RedisService` and call `getClient()` to obtain the raw `ioredis` client instance.
 
+### Auth / Captcha
+
+The login flow now requires an SVG captcha challenge backed by Redis.
+
+- Call `GET /auth/captcha` before `POST /auth/login`
+- Submit `captchaId` and `captchaCode` together with `username` and `password`
+- Captcha settings live under `auth.captcha` in `config/application.yml`
+- `redis.enabled` must be `true` for the auth module because both login sessions and captcha records are stored in Redis
+
 ## API Documentation Publishing
 
 OpenAPI source files are maintained under `docs/openapi/`, and public publish artifacts are generated into `docs-publish/`.
