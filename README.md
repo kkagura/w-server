@@ -169,6 +169,34 @@ $ mau deploy
 
 With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
 
+### Docker image
+
+The repository now includes a multi-stage `Dockerfile` for production builds.
+
+Build the image locally:
+
+```bash
+docker build -t w-server:latest .
+```
+
+Run the container with the bundled production config:
+
+```bash
+docker run -d \
+  --name w-server \
+  --restart=always \
+  -p 8080:8080 \
+  -e NODE_ENV=prod \
+  w-server:latest
+```
+
+Important deployment notes:
+
+- The container expects the `config/` directory to be present inside the image and loads `config/application.yml` plus `config/application.prod.yml` when `NODE_ENV=prod`
+- Override sensitive values such as `AUTH_ACCESS_TOKEN_SECRET`, `AUTH_REFRESH_TOKEN_SECRET`, `DB_PASSWORD`, `REDIS_PASSWORD`, and `MINIO_SECRET_KEY` through environment variables instead of baking them into the image
+- If MySQL, Redis, and MinIO run in Docker on the same host, prefer connecting to them through a shared Docker network and use the service container names as `DB_HOST`, `REDIS_HOST`, and `MINIO_ENDPOINT`
+- If you update the OpenAPI source files under `docs/openapi/`, run `pnpm run docs:build` before building a release image so `docs-publish/` stays in sync for separate document publishing workflows
+
 ## Resources
 
 Check out a few resources that may come in handy when working with NestJS:

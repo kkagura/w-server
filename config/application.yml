@@ -57,12 +57,12 @@ redis:
 auth:
   # Access Token 签名密钥。
   # 生产环境必须通过环境变量或独立配置覆盖为高强度随机字符串。
-  accessTokenSecret: please-change-me-access-token-secret
+  accessTokenSecret: 
   # Access Token 有效期，单位秒。
   accessTokenExpiresIn: 900
   # Refresh Token 签名密钥。
   # 生产环境必须通过环境变量或独立配置覆盖为高强度随机字符串。
-  refreshTokenSecret: please-change-me-refresh-token-secret
+  refreshTokenSecret: 
   # Refresh Token 有效期，单位秒。
   refreshTokenExpiresIn: 604800
   # Token 签发方标识。
